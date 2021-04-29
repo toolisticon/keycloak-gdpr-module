@@ -12,6 +12,10 @@
 
   <packaging>ear</packaging>
 
+  <properties>
+    <sonar.projectKey>toolisticon_keycloak-gdpr-module_deployment</sonar.projectKey>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.toolisticon.keycloak</groupId>

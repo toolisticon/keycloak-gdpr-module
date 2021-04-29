@@ -5,19 +5,17 @@
     <groupId>io.toolisticon.keycloak</groupId>
     <artifactId>gdpr-module</artifactId>
     <version>0.1.0-SNAPSHOT</version>
+    <name>GDPR for Keycloak Server</name>
+    <packaging>pom</packaging>
 
-    <name>keycloak-gdpr-module</name>
-    <description>Please refer to https://github.com/keycloak-gdpr-module/keycloak-gdpr-module</description>
-    <url>https://github.com/keycloak-gdpr-module/keycloak-gdpr-module</url>
+    <description>Please refer to https://github.com/toolisticon/keycloak-gdpr-module</description>
+    <url>https://github.com/toolisticon/keycloak-gdpr-module</url>
 
     <parent>
         <groupId>io.toolisticon.maven</groupId>
         <artifactId>maven-oss-parent</artifactId>
         <version>0.7.0</version>
     </parent>
-
-
-    <packaging>pom</packaging>
 
     <modules>
         <module>deployment</module>
@@ -73,6 +71,10 @@
 
         <java.compile.source.version>1.8</java.compile.source.version>
         <java.compile.target.version>1.8</java.compile.target.version>
+
+        <sonar.projectKey>toolisticon_keycloak-gdpr-module</sonar.projectKey>
+        <sonar.organization>toolisticon-github</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <!-- logging dependencies -->
         <log4j2.version>2.14.1</log4j2.version>

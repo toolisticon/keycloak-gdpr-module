@@ -9,6 +9,13 @@
 
     <artifactId>spi</artifactId>
     <name>GDPR module for Keycloak Server</name>
+
+    <packaging>jar</packaging>
+
+    <properties>
+        <sonar.projectKey>toolisticon_keycloak-gdpr-module_spi</sonar.projectKey>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.keycloak</groupId>

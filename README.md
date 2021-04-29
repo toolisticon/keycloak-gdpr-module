@@ -1,5 +1,5 @@
 [![CI](https://github.com/toolisticon/keycloak-gdpr-module/actions/workflows/build.yml/badge.svg)](https://github.com/toolisticon/keycloak-gdpr-module/actions/workflows/build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=io.toolisticon.keycloak%3Agdpr-module&metric=alert_status)](https://sonarcloud.io/dashboard?id=io.toolisticon.keycloak%3Agdpr-module)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=toolisticon_keycloak-gdpr-module&metric=alert_status)](https://sonarcloud.io/dashboard?id=toolisticon_keycloak-gdpr-module)
 
 - [Keycloak GDPR Module](#keycloak-gdpr-module)
   - [Setup](#setup)
