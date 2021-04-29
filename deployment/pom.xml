@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.toolisticon.keycloak</groupId>
+    <artifactId>gdpr-module</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>deployment</artifactId>
+  <name>GDPR Module for Keycloak ear Deployment</name>
+
+  <packaging>ear</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.toolisticon.keycloak</groupId>
+      <artifactId>spi</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>gdpr-module-for-keycloak-${project.version}</finalName>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-ear-plugin</artifactId>
+        <version>${maven-ear-plugin.version}</version>
+        <configuration>
+          <defaultLibBundleDir>lib</defaultLibBundleDir>
+          <modules>
+            <jarModule>
+              <groupId>io.toolisticon.keycloak</groupId>
+              <artifactId>spi</artifactId>
+              <includeInApplicationXml>true</includeInApplicationXml>
+              <bundleFileName>keycloak-gdpr-spi.jar</bundleFileName>
+              <bundleDir>/</bundleDir>
+            </jarModule>
+          </modules>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
