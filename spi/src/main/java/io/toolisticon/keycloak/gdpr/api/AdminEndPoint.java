@@ -6,6 +6,7 @@ import org.keycloak.services.resources.admin.AdminRoot;
 
 @Slf4j
 public class AdminEndPoint extends AdminRoot {
+    
     public AdminEndPoint(KeycloakSession session) {
         this.session = session;
     }
