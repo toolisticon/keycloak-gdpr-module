@@ -69,8 +69,6 @@
 
         <java.version>1.8</java.version>
 
-        <java.compile.source.version>1.8</java.compile.source.version>
-        <java.compile.target.version>1.8</java.compile.target.version>
 
         <sonar.projectKey>toolisticon_keycloak-gdpr-module</sonar.projectKey>
         <sonar.organization>toolisticon-github</sonar.organization>
@@ -95,7 +93,6 @@
 
         <!-- plugin versions -->
         <maven-ear-plugin.version>3.1.0</maven-ear-plugin.version>
-        <maven-formatter-plugin.version>2.15.0</maven-formatter-plugin.version>
         <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
         <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
         <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
@@ -252,8 +249,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
@@ -265,23 +262,6 @@
                 <configuration>
                     <groups>!integration-tests</groups>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>${maven-formatter-plugin.version}</version>
-                <configuration>
-                    <configFile>${formatter-path}/formatter.xml</configFile>
-                    <lineEnding>LF</lineEnding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
