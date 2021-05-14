@@ -22,18 +22,21 @@ Prerequisites:
 * JDK 11+
 * Docker
 
-Start the docker stack:
-
-```
-docker-compose up -d
-```
-
 Build the EAR:
 
 1. build with maven
    * `mvn clean package -DskipTests`
 2. find the gdpr-for-keycloak artifact in:
    `deployment/target/gdpr-module-for-keycloak-${project.incremental.version}.ear`
+
+Start the docker stack:
+
+```
+docker-compose up -d
+```
+
+**Note:** If the keycloak container is started before the Maven project is built, instead of the ear-file there will be an empty
+directory created inside the container. The container then needs to be rebuilt in order to work properly.
 
 ## Deploy into a standalone keycloak server
 
