@@ -1,16 +1,19 @@
 package io.toolisticon.keycloak.gdpr.api;
 
-import javax.ws.rs.GET;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.managers.RealmManager;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 
 
@@ -45,12 +48,21 @@ public class GdprEndpoint {
         return realm;
     }
 
-    // can be read via curl localhost:8888/auth/realms/master/gdpr/test/
+    // can be read via curl localhost:8888/auth/realms/master/gdpr/encrypt/
     // TODO adding auth
-    @Path("test")
-    @GET
+    @Path("encrypt")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String test() {
-        return "42";
+    public EncryptedData encrypt(DecryptedData data) {
+        return new EncryptedData(data.getUserId(), "encrypted data");
+    }
+
+    @Path("decrypt")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public DecryptedData decrypt(EncryptedData data) {
+        return new DecryptedData(data.getUserId(), "42");
     }
 }
