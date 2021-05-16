@@ -71,6 +71,14 @@
             <scope>provided</scope>
         </dependency>
 
+      <!-- Crypto Dependencies -->
+
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk15on</artifactId>
+        <version>1.68</version>
+      </dependency>
+
         <!-- test dependencies -->
         <dependency>
             <groupId>com.h2database</groupId>

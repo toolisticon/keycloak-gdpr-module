@@ -1,5 +1,7 @@
 package io.toolisticon.keycloak.gdpr.api;
 
+import java.nio.charset.StandardCharsets;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -7,15 +9,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.managers.RealmManager;
 
+import io.toolisticon.keycloak.gdpr.crypto.EncryptionService;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-
 
 @Slf4j
 public class GdprEndpoint {
@@ -25,9 +27,11 @@ public class GdprEndpoint {
      */
     @Getter(AccessLevel.PROTECTED)
     private final KeycloakSession keycloakSession;
+    private final EncryptionService encryptionService;
 
-    public GdprEndpoint(KeycloakSession keycloakSession) {
+    public GdprEndpoint(KeycloakSession keycloakSession, EncryptionService encryptionService) {
         this.keycloakSession = keycloakSession;
+        this.encryptionService = encryptionService;
     }
 
     /**
@@ -55,7 +59,11 @@ public class GdprEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public EncryptedData encrypt(DecryptedData data) {
-        return new EncryptedData(data.getUserId(), "encrypted data");
+        final byte[] dataBytes = data.getData().getBytes(StandardCharsets.UTF_8);
+        final byte[] encryptedData = encryptionService.encrypt(data.getUserId(), dataBytes);
+
+        final String encodedCipherText = Base64.toBase64String(encryptedData);
+        return new EncryptedData(data.getUserId(), encodedCipherText);
     }
 
     @Path("decrypt")
@@ -63,6 +71,10 @@ public class GdprEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public DecryptedData decrypt(EncryptedData data) {
-        return new DecryptedData(data.getUserId(), "42");
+        final byte[] cipherText = Base64.decode(data.getCipherText());
+
+        final byte[] decryptedBytes = encryptionService.decrypt(data.getUserId(), cipherText);
+        final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
+        return new DecryptedData(data.getUserId(), decryptedData);
     }
 }
