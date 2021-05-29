@@ -6,6 +6,8 @@
   - [Deploy into a standalone keycloak server](#deploy-into-a-standalone-keycloak-server)
   - [Development](#development)
     - [Local Keycloak server](#local-keycloak-server)
+  - [Testing](#testing)
+    - [Performance Tests](#performance-tests)
 # Keycloak GDPR Module
 
 > A module
@@ -15,6 +17,8 @@
   - [Deploy into a standalone keycloak server](#deploy-into-a-standalone-keycloak-server)
   - [Development](#development)
     - [Local Keycloak server](#local-keycloak-server)
+  - [Testing](#testing)
+    - [Performance Tests](#performance-tests)
 
 ## Setup
 
@@ -57,4 +61,13 @@ The Keycloak server will now be available on <http://localhost:8888>. You can lo
 To test the module build it
 ```
 $ ./mvn package
+```
+
+## Testing
+
+### Performance Tests
+
+For performance we're using (Gatling)[https://gatling.io/docs/current/quickstart/]:
+```
+(cd spi/ && ../mvnw gatling:test)
 ```

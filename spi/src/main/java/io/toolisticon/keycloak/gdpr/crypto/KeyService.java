@@ -9,8 +9,13 @@ import java.util.Optional;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 public class KeyService {
+
+    @PersistenceContext
+    protected EntityManager em;
 
     private final HashMap<String, SecretKey> keys = new HashMap<>();
     private final KeyGenerator keyGenerator;
