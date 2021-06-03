@@ -28,8 +28,6 @@ services:
     links:
       - mysql
       - maildev
-    volumes:
-      - ./deployment/target/gdpr-module-for-keycloak.ear:/opt/jboss/keycloak/standalone/deployments/gdpr-module-for-keycloak.ear
     environment:
       DB_VENDOR: MYSQL
       DB_ADDR: mysql
