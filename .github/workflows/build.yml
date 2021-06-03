@@ -51,6 +51,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Prepare Env
+        run: ./mvnw clean package -DskipTests=true && docker-compose up -d && echo -n 'wait for app to be ready '; until $(curl --output /dev/null --silent --head --fail http://localhost:8888); do printf '.'; sleep 5; done;
+
       - name: Run gatlin tests
         run: (cd spi/ && ../mvnw gatling:test)
 
