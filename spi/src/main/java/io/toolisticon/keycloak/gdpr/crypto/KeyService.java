@@ -12,6 +12,9 @@ import javax.crypto.SecretKey;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class KeyService {
 
     @PersistenceContext
@@ -32,6 +35,7 @@ public class KeyService {
     private SecretKey createKey(String userId) {
         final SecretKey secretKey = keyGenerator.generateKey();
         keys.put(userId, secretKey);
+        log.info("created key for userId {}", userId);
         return secretKey;
     }
 

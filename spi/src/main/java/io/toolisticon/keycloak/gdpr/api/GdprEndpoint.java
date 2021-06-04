@@ -2,6 +2,7 @@ package io.toolisticon.keycloak.gdpr.api;
 
 import java.nio.charset.StandardCharsets;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -14,7 +15,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.managers.RealmManager;
 
+import io.toolisticon.keycloak.gdpr.crypto.DecryptionFailedException;
+import io.toolisticon.keycloak.gdpr.crypto.EncryptionFailedException;
 import io.toolisticon.keycloak.gdpr.crypto.EncryptionService;
+import io.toolisticon.keycloak.gdpr.crypto.KeyNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -59,11 +63,15 @@ public class GdprEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public EncryptedData encrypt(DecryptedData data) {
-        final byte[] dataBytes = data.getData().getBytes(StandardCharsets.UTF_8);
-        final byte[] encryptedData = encryptionService.encrypt(data.getUserId(), dataBytes);
+        try {
+            final byte[] dataBytes = data.getData().getBytes(StandardCharsets.UTF_8);
+            final byte[] encryptedData = encryptionService.encrypt(data.getUserId(), dataBytes);
 
-        final String encodedCipherText = Base64.toBase64String(encryptedData);
-        return new EncryptedData(data.getUserId(), encodedCipherText);
+            final String encodedCipherText = Base64.toBase64String(encryptedData);
+            return new EncryptedData(data.getUserId(), encodedCipherText);
+        } catch (EncryptionFailedException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 
     @Path("decrypt")
@@ -73,8 +81,12 @@ public class GdprEndpoint {
     public DecryptedData decrypt(EncryptedData data) {
         final byte[] cipherText = Base64.decode(data.getCipherText());
 
-        final byte[] decryptedBytes = encryptionService.decrypt(data.getUserId(), cipherText);
-        final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
-        return new DecryptedData(data.getUserId(), decryptedData);
+        try {
+            final byte[] decryptedBytes = encryptionService.decrypt(data.getUserId(), cipherText);
+            final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
+            return new DecryptedData(data.getUserId(), decryptedData);
+        } catch (DecryptionFailedException | KeyNotFoundException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 }
