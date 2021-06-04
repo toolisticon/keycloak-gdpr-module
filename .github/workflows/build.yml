@@ -52,13 +52,19 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Prepare Env
-        run: ./mvnw clean package -DskipTests=true && docker-compose up -d && echo -n 'wait for app to be ready '; until $(curl --output /dev/null --silent --head --fail http://localhost:8888); do printf '.'; sleep 5; done;
+        run: | 
+          ./mvnw clean package -DskipTests=true
+          docker-compose up -d
+          echo -n 'wait for app to be ready '; until $(curl --output /dev/null --silent --head --fail http://localhost:8888); do printf '.'; sleep 5; done;
+          .bin/update-spi.sh
 
       - name: Run gatlin tests
         run: (cd spi/ && ../mvnw gatling:test)
 
       - name: Prepare reports folder
-        run: mkdir -p public/test-reports/gatling && cp -rp spi/target/gatling/* public/test-reports/gatling/
+        run: | 
+          mkdir -p public/test-reports/gatling 
+          cp -rp spi/target/gatling/* public/test-reports/gatling/
 
       - name: Deploy report page
         uses: peaceiris/actions-gh-pages@v3
