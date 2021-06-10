@@ -31,7 +31,7 @@ jobs:
       run: ./mvnw clean package -U
 
   Performance-Tests:
-    name: Gatlin Integration Tests
+    name: Gatling Integration Tests
     runs-on: ubuntu-latest
     needs: Build
 
@@ -58,7 +58,7 @@ jobs:
           echo -n 'wait for app to be ready '; until $(curl --output /dev/null --silent --head --fail http://localhost:8888); do printf '.'; sleep 5; done;
           .bin/update-spi.sh
 
-      - name: Run gatlin tests
+      - name: Run Gatling tests
         run: (cd spi/ && ../mvnw gatling:test)
 
       - name: Prepare reports folder
