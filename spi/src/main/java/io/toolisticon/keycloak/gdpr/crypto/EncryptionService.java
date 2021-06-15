@@ -47,7 +47,7 @@ public class EncryptionService {
             final Cipher cipher = decryptCipher(key);
             return cipher.doFinal(cipherText);
         } catch (Exception e) {
-            throw new DecryptionFailedException();
+            throw new DecryptionFailedException(e);
         }
     }
 
