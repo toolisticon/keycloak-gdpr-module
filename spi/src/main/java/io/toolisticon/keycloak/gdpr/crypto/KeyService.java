@@ -4,6 +4,7 @@ import static io.toolisticon.keycloak.gdpr.GdprEndpointProviderFactory.JCE_PROVI
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -13,12 +14,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 @Slf4j
 public class KeyService {
-
-    @PersistenceContext
-    protected EntityManager em;
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     private final HashMap<String, SecretKey> keys = new HashMap<>();
     private final KeyGenerator keyGenerator;
