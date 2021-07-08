@@ -10,8 +10,6 @@ import java.util.Optional;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
