@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.managers.AppAuthManager;
+import org.keycloak.services.managers.AuthenticationManager.AuthResult;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -23,10 +25,12 @@ public class GdprEndpoint {
     @Getter(AccessLevel.PROTECTED)
     private final KeycloakSession keycloakSession;
     private final EncryptionService encryptionService;
+    private final AuthResult auth;
 
     public GdprEndpoint(KeycloakSession keycloakSession, EncryptionService encryptionService) {
         this.keycloakSession = keycloakSession;
         this.encryptionService = encryptionService;
+        this.auth = new AppAuthManager.BearerTokenAuthenticator(keycloakSession).authenticate();
     }
 
     /**
@@ -38,12 +42,12 @@ public class GdprEndpoint {
     }
 
     // can be read via curl localhost:8888/auth/realms/master/gdpr/encrypt/
-    // TODO adding auth
     @Path("encrypt")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public EncryptedData encrypt(DecryptedData data) {
+        this.checkAccessRights();
         try {
             final byte[] dataBytes = data.getData().getBytes(StandardCharsets.UTF_8);
             final byte[] encryptedData = encryptionService.encrypt(data.getUserId(), dataBytes);
@@ -60,6 +64,7 @@ public class GdprEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public DecryptedData decrypt(EncryptedData data) {
+        this.checkAccessRights();
         final byte[] cipherText = Base64.decode(data.getCipherText());
 
         try {
@@ -68,6 +73,14 @@ public class GdprEndpoint {
             return new DecryptedData(data.getUserId(), decryptedData);
         } catch (DecryptionFailedException | KeyNotFoundException e) {
             throw new BadRequestException(e.getMessage(), e);
+        }
+    }
+
+    protected void checkAccessRights() {
+        if (this.auth == null) {
+            throw new NotAuthorizedException("Bearer");
+        } else if (this.auth.getToken().getRealmAccess() == null) {
+            throw new ForbiddenException("Don't have realm access");
         }
     }
 }
