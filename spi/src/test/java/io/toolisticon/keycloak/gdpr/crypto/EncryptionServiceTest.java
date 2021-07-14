@@ -29,7 +29,7 @@ class EncryptionServiceTest {
     }
 
     @Test
-    void shouldNotForUnkownUser() {
+    void shouldNotDecryptForUnkownUser() {
         String user1 = "1";
         String user2 = "2";
         String sampleText = "just sample text";

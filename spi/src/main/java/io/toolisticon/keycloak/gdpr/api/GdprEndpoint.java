@@ -1,20 +1,5 @@
 package io.toolisticon.keycloak.gdpr.api;
 
-import java.nio.charset.StandardCharsets;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.bouncycastle.util.encoders.Base64;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.services.managers.RealmManager;
-
 import io.toolisticon.keycloak.gdpr.crypto.DecryptionFailedException;
 import io.toolisticon.keycloak.gdpr.crypto.EncryptionFailedException;
 import io.toolisticon.keycloak.gdpr.crypto.EncryptionService;
@@ -22,6 +7,12 @@ import io.toolisticon.keycloak.gdpr.crypto.KeyNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.util.encoders.Base64;
+import org.keycloak.models.KeycloakSession;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class GdprEndpoint {
@@ -44,16 +35,6 @@ public class GdprEndpoint {
     @Path("admin")
     public Object getAdminApiRoot() {
         return new AdminEndPoint(this.keycloakSession);
-    }
-
-    private RealmModel init(String realmName) {
-        RealmManager realmManager = new RealmManager(this.keycloakSession);
-        RealmModel realm = realmManager.getRealmByName(realmName);
-        if (realm == null) {
-            throw new NotFoundException("Realm does not exist");
-        }
-        this.keycloakSession.getContext().setRealm(realm);
-        return realm;
     }
 
     // can be read via curl localhost:8888/auth/realms/master/gdpr/encrypt/

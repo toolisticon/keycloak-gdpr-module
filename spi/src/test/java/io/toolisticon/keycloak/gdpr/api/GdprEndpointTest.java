@@ -2,22 +2,27 @@ package io.toolisticon.keycloak.gdpr.api;
 
 import io.toolisticon.keycloak.gdpr.crypto.EncryptionService;
 import io.toolisticon.keycloak.gdpr.crypto.KeyService;
+import org.bouncycastle.util.encoders.DecoderException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.models.KeycloakSession;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
 class GdprEndpointTest {
-    private static KeycloakSession kcSession;
+
     private static GdprEndpoint endpoint;
 
     @BeforeAll
     static void setup() throws Exception {
-        endpoint = new GdprEndpoint(kcSession, new EncryptionService(new KeyService()));
+        endpoint = new GdprEndpoint(Mockito.mock(KeycloakSession.class), new EncryptionService(new KeyService()));
+    }
+
+    @Test
+    void shouldInit() {
+        assertNotNull(endpoint.getAdminApiRoot());
+        assertNotNull(endpoint.getKeycloakSession());
     }
 
     @Test
@@ -39,7 +44,17 @@ class GdprEndpointTest {
         data.setUserId("1");
         DecryptedData result = endpoint.decrypt(endpoint.encrypt(data));
         assertNotNull(result);
-        assertTrue(data.equals(result));
+        assertEquals(data, result);
         assertEquals(data.toString(), result.toString());
+    }
+
+    @Test
+    void shouldNotDecryptInvalid() {
+        EncryptedData data = new EncryptedData();
+        data.setCipherText("lorem ipsum");
+        data.setUserId("1");
+        assertThrows(DecoderException.class, () -> {
+            endpoint.decrypt(data);
+        });
     }
 }
