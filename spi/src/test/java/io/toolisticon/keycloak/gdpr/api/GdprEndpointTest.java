@@ -8,10 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.keycloak.common.ClientConnection;
-import org.keycloak.models.KeycloakContext;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakUriInfo;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.*;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.HttpHeaders;
@@ -19,6 +16,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 
+import static io.toolisticon.keycloak.gdpr.util.UserModelHelper.buildUser;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,6 +26,7 @@ class GdprEndpointTest {
     static GdprEndpoint endpoint;
     static KeycloakSession session;
     static EncryptionService encryptionService;
+    static RealmModel realmModel;
 
 
     @BeforeAll
@@ -37,7 +36,7 @@ class GdprEndpointTest {
         KeycloakContext ctx = mock(KeycloakContext.class);
         HttpHeaders httpHeaders = mock(HttpHeaders.class);
         KeycloakUriInfo urInfo = mock(KeycloakUriInfo.class);
-        RealmModel realmModel = mock(RealmModel.class);
+        realmModel = mock(RealmModel.class);
         MultivaluedMap<String, String> requestHeaders = new MultivaluedHashMap<>();
         requestHeaders.putSingle(HttpHeaders.AUTHORIZATION, "BEARER 124555");
         when(session.getContext()).thenReturn(ctx);
@@ -78,13 +77,23 @@ class GdprEndpointTest {
 
     @Nested
     class Crypto {
+        UserModel user;
 
         @BeforeEach
         void setup() throws Exception {
+            user = buildUser();
+            UserProvider userProvider = mock(UserProvider.class);
+            when(userProvider.getUserById(realmModel, user.getId())).thenReturn(user);
+            when(session.users()).thenReturn(userProvider);
             endpoint = new GdprEndpoint(session, new EncryptionService(new KeyService())) {
                 @Override
                 protected void checkAccessRights() {
                     // ignore checks
+                }
+
+                @Override
+                protected RealmModel getRealmModel() {
+                  return realmModel;
                 }
             };
         }
@@ -99,7 +108,7 @@ class GdprEndpointTest {
         void shouldEncryptData() {
             DecryptedData data = new DecryptedData();
             data.setData("lorem ipsum");
-            data.setUserId("1");
+            data.setUserId(user.getId());
             EncryptedData result = endpoint.encrypt(data);
             assertNotNull(result);
             assertEquals(data.getUserId(), result.getUserId());
@@ -111,7 +120,7 @@ class GdprEndpointTest {
         void shouldDecryptData() {
             DecryptedData data = new DecryptedData();
             data.setData("lorem ipsum");
-            data.setUserId("1");
+            data.setUserId(user.getId());
             DecryptedData result = endpoint.decrypt(endpoint.encrypt(data));
             assertNotNull(result);
             assertEquals(data, result);
@@ -122,7 +131,7 @@ class GdprEndpointTest {
         void shouldNotDecryptInvalid() {
             EncryptedData data = new EncryptedData();
             data.setCipherText("lorem ipsum");
-            data.setUserId("1");
+            data.setUserId(user.getId());
             assertThrows(DecoderException.class, () -> {
                 endpoint.decrypt(data);
             });

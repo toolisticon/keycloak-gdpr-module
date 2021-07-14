@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager.AuthResult;
 
@@ -50,7 +52,7 @@ public class GdprEndpoint {
         this.checkAccessRights();
         try {
             final byte[] dataBytes = data.getData().getBytes(StandardCharsets.UTF_8);
-            final byte[] encryptedData = encryptionService.encrypt(data.getUserId(), dataBytes);
+            final byte[] encryptedData = encryptionService.encrypt(getUserModel(data.getUserId()), dataBytes);
 
             final String encodedCipherText = Base64.toBase64String(encryptedData);
             return new EncryptedData(data.getUserId(), encodedCipherText);
@@ -66,9 +68,8 @@ public class GdprEndpoint {
     public DecryptedData decrypt(EncryptedData data) {
         this.checkAccessRights();
         final byte[] cipherText = Base64.decode(data.getCipherText());
-
         try {
-            final byte[] decryptedBytes = encryptionService.decrypt(data.getUserId(), cipherText);
+            final byte[] decryptedBytes = encryptionService.decrypt(getUserModel(data.getUserId()), cipherText);
             final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
             return new DecryptedData(data.getUserId(), decryptedData);
         } catch (DecryptionFailedException | KeyNotFoundException e) {
@@ -82,5 +83,13 @@ public class GdprEndpoint {
         } else if (this.auth.getToken().getRealmAccess() == null) {
             throw new ForbiddenException("Don't have realm access");
         }
+    }
+
+    protected RealmModel getRealmModel() {
+        return this.auth.getSession().getRealm();
+    }
+
+    private UserModel getUserModel(String userId) {
+        return this.keycloakSession.users().getUserById(getRealmModel(), userId);
     }
 }

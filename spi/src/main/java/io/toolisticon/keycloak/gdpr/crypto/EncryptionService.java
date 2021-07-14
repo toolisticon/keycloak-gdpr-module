@@ -1,20 +1,19 @@
 package io.toolisticon.keycloak.gdpr.crypto;
 
-import static io.toolisticon.keycloak.gdpr.GdprEndpointProviderFactory.JCE_PROVIDER;
-
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.util.encoders.Hex;
+import org.keycloak.models.UserModel;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
-import org.bouncycastle.util.encoders.Hex;
-
-import lombok.extern.slf4j.Slf4j;
+import static io.toolisticon.keycloak.gdpr.GdprEndpointProviderFactory.JCE_PROVIDER;
 
 @Slf4j
 public class EncryptionService {
@@ -30,9 +29,9 @@ public class EncryptionService {
         this.keyService = keyService;
     }
 
-    public byte[] encrypt(String userId, byte[] data) {
+    public byte[] encrypt(UserModel user, byte[] data) {
         try {
-            final SecretKey key = keyService.getOrCreate(userId);
+            final SecretKey key = keyService.getOrCreate(user);
             final Cipher cipher = encryptCipher(key);
             return cipher.doFinal(data);
         } catch (Exception e) {
@@ -40,8 +39,8 @@ public class EncryptionService {
         }
     }
 
-    public byte[] decrypt(String userId, byte[] cipherText) {
-        final SecretKey key = keyService.get(userId)
+    public byte[] decrypt(UserModel user, byte[] cipherText) {
+        final SecretKey key = keyService.get(user)
                 .orElseThrow(() -> new KeyNotFoundException("No encryption key found"));
         try {
             final Cipher cipher = decryptCipher(key);
