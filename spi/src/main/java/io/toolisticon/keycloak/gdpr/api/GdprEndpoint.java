@@ -79,10 +79,13 @@ public class GdprEndpoint {
 
     protected void checkAccessRights() {
         if (this.auth == null) {
+            log.error("Empty authentication details");
             throw new NotAuthorizedException("Bearer");
         } else if (this.auth.getToken().getRealmAccess() == null) {
+            log.error("No access to realm");
             throw new ForbiddenException("Don't have realm access");
         }
+        log.debug("Got user with id {}", this.auth.getUser().getId());
     }
 
     protected RealmModel getRealmModel() {
