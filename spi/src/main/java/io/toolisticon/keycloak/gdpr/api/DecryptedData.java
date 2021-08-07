@@ -1,18 +1,27 @@
 package io.toolisticon.keycloak.gdpr.api;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * DTO for a request to /encrypt
  * DTO for a response from /decrypt
  */
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class DecryptedData {
 
     private String userId;
+
     private String data;
+
+    @Override
+    public String toString() {
+        return "DecryptedData{" +
+                "userId='" + userId + '\'' +
+                ", data=..." +
+                '}';
+    }
 }

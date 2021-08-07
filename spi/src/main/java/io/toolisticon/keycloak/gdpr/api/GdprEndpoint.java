@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.DecoderException;
+import org.bouncycastle.util.encoders.EncoderException;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -17,6 +19,7 @@ import org.keycloak.services.managers.AuthenticationManager.AuthResult;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @Slf4j
 public class GdprEndpoint {
@@ -56,7 +59,7 @@ public class GdprEndpoint {
 
             final String encodedCipherText = Base64.toBase64String(encryptedData);
             return new EncryptedData(data.getUserId(), encodedCipherText);
-        } catch (EncryptionFailedException e) {
+        } catch (EncoderException | EncryptionFailedException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -67,11 +70,56 @@ public class GdprEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public DecryptedData decrypt(EncryptedData data) {
         this.checkAccessRights();
-        final byte[] cipherText = Base64.decode(data.getCipherText());
         try {
+            final byte[] cipherText = Base64.decode(data.getCipherText());
             final byte[] decryptedBytes = encryptionService.decrypt(getUserModel(data.getUserId()), cipherText);
             final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
             return new DecryptedData(data.getUserId(), decryptedData);
+        } catch (DecoderException | DecryptionFailedException | KeyNotFoundException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
+    }
+    // BATCH OPERATIONS
+
+    @Path("encrypt/batch")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public EncryptedBatchData encrypt(DecryptedBatchData data) {
+        this.checkAccessRights();
+        try {
+            final EncryptedBatchData result = new EncryptedBatchData();
+            result.setUserId(data.getUserId());
+            final UserModel user = getUserModel(data.getUserId());
+            for (Map.Entry<String, String> entry : data.getData().entrySet()) {
+                final byte[] dataBytes = entry.getValue().getBytes(StandardCharsets.UTF_8);
+                final byte[] encryptedData = encryptionService.encrypt(user, dataBytes);
+                result.getCipherTextEntries().put(entry.getKey(), Base64.toBase64String(encryptedData));
+            }
+            log.debug("Encryption done {}", result);
+            return result;
+        } catch (EncryptionFailedException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
+    }
+
+    @Path("decrypt/batch")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public DecryptedBatchData decrypt(EncryptedBatchData data) {
+        this.checkAccessRights();
+        try {
+            final DecryptedBatchData result = new DecryptedBatchData();
+            result.setUserId(data.getUserId());
+            for (Map.Entry<String, String> entry : data.getCipherTextEntries().entrySet()) {
+                final byte[] cipherText = Base64.decode(entry.getValue());
+                final byte[] decryptedBytes = encryptionService.decrypt(getUserModel(data.getUserId()), cipherText);
+                final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
+                result.getData().put(entry.getKey(), decryptedData);
+            }
+            log.debug("Decryption done {}", result);
+            return result;
         } catch (DecryptionFailedException | KeyNotFoundException e) {
             throw new BadRequestException(e.getMessage(), e);
         }

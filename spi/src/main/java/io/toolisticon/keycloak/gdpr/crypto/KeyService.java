@@ -1,7 +1,9 @@
 package io.toolisticon.keycloak.gdpr.crypto;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.models.UserModel;
 
 import javax.crypto.KeyGenerator;
@@ -50,7 +52,7 @@ public class KeyService {
     public Optional<SecretKey> get(UserModel user) {
         // check if existing key already added on User Model
         final List<String> userKeyAttributes = user.getAttributes().get(USER_ATTR_PRIV_KEY);
-        if (userKeyAttributes != null && userKeyAttributes.size() > 0) {
+        if (!CollectionUtils.isEmpty(userKeyAttributes)) {
             final String key = userKeyAttributes.get(0);
             log.debug("Found existing key for userId {}", user.getId());
             byte[] decodedKey = Base64.getDecoder().decode(key);

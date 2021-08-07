@@ -2,7 +2,6 @@ package io.toolisticon.keycloak.gdpr.api;
 
 import io.toolisticon.keycloak.gdpr.crypto.EncryptionService;
 import io.toolisticon.keycloak.gdpr.crypto.KeyService;
-import org.bouncycastle.util.encoders.DecoderException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -10,11 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.*;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
+import java.util.HashMap;
 
 import static io.toolisticon.keycloak.gdpr.util.UserModelHelper.buildUser;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +28,6 @@ class GdprEndpointTest {
     static KeycloakSession session;
     static EncryptionService encryptionService;
     static RealmModel realmModel;
-
 
     @BeforeAll
     static void setup() throws Exception {
@@ -64,7 +64,7 @@ class GdprEndpointTest {
         }
 
         @Test
-        void shouldFailDueToAccessProblems() {
+        void shouldFailDecryptDueToAccessProblems() {
             EncryptedData data = new EncryptedData();
             data.setCipherText("lorem ipsum");
             data.setUserId("1");
@@ -72,6 +72,17 @@ class GdprEndpointTest {
                 endpoint.decrypt(data);
             });
         }
+
+        @Test
+        void shouldFailEncryptDueToAccessProblems() {
+            DecryptedData data = new DecryptedData();
+            data.setData("lorem ipsum");
+            data.setUserId("1");
+            assertThrows(NotAuthorizedException.class, () -> {
+                endpoint.encrypt(data);
+            });
+        }
+
 
     }
 
@@ -93,7 +104,7 @@ class GdprEndpointTest {
 
                 @Override
                 protected RealmModel getRealmModel() {
-                  return realmModel;
+                    return realmModel;
                 }
             };
         }
@@ -106,33 +117,83 @@ class GdprEndpointTest {
 
         @Test
         void shouldEncryptData() {
-            DecryptedData data = new DecryptedData();
-            data.setData("lorem ipsum");
-            data.setUserId(user.getId());
+            DecryptedData data = new DecryptedData(user.getId(), "lorem ipsum");
             EncryptedData result = endpoint.encrypt(data);
+            EncryptedData result2 = endpoint.encrypt(data);
             assertNotNull(result);
+            assertEquals(result2, result);
+            assertEquals(result2.hashCode(), result.hashCode());
             assertEquals(data.getUserId(), result.getUserId());
             assertNotEquals(data.getData(), result.toString());
             assertNotEquals(data.getData(), result.getCipherText());
         }
 
         @Test
+        void shouldEncryptDataInBatch() {
+            DecryptedBatchData data = new DecryptedBatchData(user.getId(), new HashMap<String, String>() {
+                {
+                    put("text", "lorem ipsum");
+                }
+            });
+            EncryptedBatchData result = endpoint.encrypt(data);
+            EncryptedBatchData result2 = endpoint.encrypt(data);
+            assertNotNull(result);
+            assertEquals(result2, result);
+            assertEquals(result2.hashCode(), result.hashCode());
+            assertEquals(data.getUserId(), result.getUserId());
+            assertNotEquals(data.getData().toString(), result.toString());
+            assertNotEquals(data.getData().get("text"), result.getCipherTextEntries().get("text"));
+        }
+
+        @Test
+        void shouldNotEncryptWithUnknownUser() {
+            DecryptedData data =  new DecryptedData(buildUser().getId(),"lorem ipsum");
+            assertThrows(BadRequestException.class, () -> {
+                endpoint.encrypt(data);
+            });
+        }
+
+        @Test
         void shouldDecryptData() {
-            DecryptedData data = new DecryptedData();
-            data.setData("lorem ipsum");
+            DecryptedData data1 = new DecryptedData(user.getId(), "Neque porro quisquam est");
+            DecryptedData data2 = new DecryptedData(user.getId(),"lorem ipsum");
+            DecryptedData result1 = endpoint.decrypt(endpoint.encrypt(data1));
+            DecryptedData result2 = endpoint.decrypt(endpoint.encrypt(data2));
+            assertNotNull(result1);
+            assertNotNull(result2);
+            assertEquals(data1, result1);
+            assertEquals(data1.hashCode(), result1.hashCode());
+            assertEquals(data1.toString(), result1.toString());
+            assertNotEquals(data1, result2);
+            assertNotEquals(data1.hashCode(), result2.hashCode());
+            assertEquals(data1.toString(), result2.toString());
+            assertEquals(data2, result2);
+            assertEquals(data2.hashCode(), result2.hashCode());
+            assertEquals(data2.toString(), result2.toString());
+            assertNotEquals(data2, result1);
+            assertNotEquals(data2.hashCode(), result1.hashCode());
+            assertEquals(data2.toString(), result1.toString());
+        }
+
+        @Test
+        void shouldDecryptDataInBatch() {
+            DecryptedBatchData data = new DecryptedBatchData(user.getId(), new HashMap<String, String>() {
+                {
+                    put("text", "lorem ipsum");
+                }
+            });
             data.setUserId(user.getId());
-            DecryptedData result = endpoint.decrypt(endpoint.encrypt(data));
+            DecryptedBatchData result = endpoint.decrypt(endpoint.encrypt(data));
             assertNotNull(result);
             assertEquals(data, result);
+            assertEquals(data.hashCode(), result.hashCode());
             assertEquals(data.toString(), result.toString());
         }
 
         @Test
         void shouldNotDecryptInvalid() {
-            EncryptedData data = new EncryptedData();
-            data.setCipherText("lorem ipsum");
-            data.setUserId(user.getId());
-            assertThrows(DecoderException.class, () -> {
+            EncryptedData data = new EncryptedData(user.getId(), "lorem ipsum");
+            assertThrows(BadRequestException.class, () -> {
                 endpoint.decrypt(data);
             });
         }
