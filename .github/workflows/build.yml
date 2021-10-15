@@ -51,20 +51,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Prepare Env
-        run: | 
-          ./mvnw clean package -DskipTests=true
-          docker-compose up -d
-          echo -n 'wait for app to be ready '; until $(curl --output /dev/null --silent --head --fail http://localhost:8888); do printf '.'; sleep 5; done;
-          .bin/update-spi.sh
-
-      - name: Run Gatling tests
-        run: (cd spi/ && ../mvnw gatling:test)
-
-      - name: Prepare reports folder
-        run: | 
-          mkdir -p public/test-reports/gatling 
-          cp -rp spi/target/gatling/* public/test-reports/gatling/
+      - name: Run End2End Tests
+        run: |
+          .bin/test-end2end-docker.sh
 
       - name: Deploy report page
         uses: peaceiris/actions-gh-pages@v3
@@ -74,7 +63,7 @@ jobs:
           publish_dir: ./public
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          
+
       # TODO add generated index file for reports
 
   Sonar:
