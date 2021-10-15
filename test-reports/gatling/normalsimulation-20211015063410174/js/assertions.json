@@ -1,0 +1,10 @@
+{
+  "simulation": "crypt.NormalSimulation",
+  "simulationId": "normalsimulation",
+  "start": 1634279650174,
+  "description": "",
+  "scenarios": ["OAuth Login"],
+  "assertions": [
+
+  ]
+}
