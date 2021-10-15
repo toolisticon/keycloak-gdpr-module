@@ -1,7 +1,8 @@
 [![CI](https://github.com/toolisticon/keycloak-gdpr-module/actions/workflows/build.yml/badge.svg)](https://github.com/toolisticon/keycloak-gdpr-module/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=toolisticon_keycloak-gdpr-module&metric=alert_status)](https://sonarcloud.io/dashboard?id=toolisticon_keycloak-gdpr-module)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=toolisticon_keycloak-gdpr-module&metric=coverage)](https://sonarcloud.io/dashboard?id=toolisticon_keycloak-gdpr-module)
-ja
+[![Known Vulnerabilities](https://snyk.io/test/github/toolisticon/keycloak-gdpr-module/badge.svg)](https://snyk.io/test/github/toolisticon/keycloak-gdpr-module)
+
 - [Keycloak GDPR Module](#keycloak-gdpr-module)
   - [Setup](#setup)
   - [Deploy into a standalone keycloak server](#deploy-into-a-standalone-keycloak-server)
