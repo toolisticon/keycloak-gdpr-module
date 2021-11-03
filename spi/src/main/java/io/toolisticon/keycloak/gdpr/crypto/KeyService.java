@@ -1,21 +1,27 @@
 package io.toolisticon.keycloak.gdpr.crypto;
 
-import static io.toolisticon.keycloak.gdpr.GdprEndpointProviderFactory.JCE_PROVIDER;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.util.HashMap;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.keycloak.common.util.CollectionUtil;
+import org.keycloak.models.UserModel;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import static io.toolisticon.keycloak.gdpr.GdprEndpointProviderFactory.JCE_PROVIDER;
 
 @Slf4j
 public class KeyService {
+
+    public static final String USER_ATTR_PRIV_KEY = "GDPR_PRIV_KEY";
+    public static final String ENCRYPTION_ALGORITHM = "AES";
+
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
@@ -28,22 +34,37 @@ public class KeyService {
         keyGenerator.init(256);
     }
 
-    public SecretKey getOrCreate(String userId) {
-        return get(userId).orElseGet(() -> createKey(userId));
+    public SecretKey getOrCreate(UserModel user) {
+        return get(user).orElseGet(() -> createKey(user));
     }
 
-    private SecretKey createKey(String userId) {
+    private SecretKey createKey(UserModel user) {
         final SecretKey secretKey = keyGenerator.generateKey();
-        keys.put(userId, secretKey);
-        log.info("created key for userId {}", userId);
+        // get base64 encoded version of the key
+        final String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+        user.getAttributes().put(USER_ATTR_PRIV_KEY, Collections.singletonList(encodedKey));
+        // add to local map, too
+        keys.put(user.getId(), secretKey);
+        log.debug("Created key for userId {}", user.getId());
         return secretKey;
     }
 
-    public Optional<SecretKey> get(String userId) {
-        return Optional.ofNullable(keys.get(userId));
+    public Optional<SecretKey> get(UserModel user) {
+        // check if existing key already added on User Model
+        final List<String> userKeyAttributes = user.getAttributes().get(USER_ATTR_PRIV_KEY);
+        if (userKeyAttributes!= null && !userKeyAttributes.isEmpty()) {
+            final String key = userKeyAttributes.get(0);
+            log.debug("Found existing key for userId {}", user.getId());
+            byte[] decodedKey = Base64.getDecoder().decode(key);
+            SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, ENCRYPTION_ALGORITHM);
+            // add to local map, too
+            keys.put(user.getId(), secretKey);
+        }
+        return Optional.ofNullable(keys.get(user.getId()));
     }
 
-    public void delete(String userId) {
-        keys.remove(userId);
+    public void delete(UserModel user) {
+        user.getAttributes().remove(USER_ATTR_PRIV_KEY);
+        keys.remove(user.getId());
     }
 }

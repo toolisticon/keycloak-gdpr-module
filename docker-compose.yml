@@ -38,6 +38,8 @@ services:
       KEYCLOAK_USER: 'admin'
       KEYCLOAK_LOGLEVEL: 'INFO'
       ROOT_LOGLEVEL: 'INFO'
+      DEBUG: 'true'
+      DEBUG_PORT: "*:8787"
 
   maildev:
     container_name: maildev
