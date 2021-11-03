@@ -52,7 +52,7 @@ public class KeyService {
     public Optional<SecretKey> get(UserModel user) {
         // check if existing key already added on User Model
         final List<String> userKeyAttributes = user.getAttributes().get(USER_ATTR_PRIV_KEY);
-        if (!CollectionUtils.isEmpty(userKeyAttributes)) {
+        if (userKeyAttributes!= null && !userKeyAttributes.isEmpty()) {
             final String key = userKeyAttributes.get(0);
             log.debug("Found existing key for userId {}", user.getId());
             byte[] decodedKey = Base64.getDecoder().decode(key);

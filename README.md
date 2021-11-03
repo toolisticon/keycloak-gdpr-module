@@ -56,7 +56,7 @@ A local Keycloak server for developing and testing the spi is available as a Doc
 
 To bring up the server, make sure you’ve installed and started [Docker Community Edition](https://docs.docker.com/engine/installation/), then use the following commands:
 ```bash
-$ docker-compose up
+$ docker compose up
 ```
 The Keycloak server will now be available on <http://localhost:8888>. You can log into the Administration Console using “**admin**” as both username and password.
 
@@ -72,4 +72,16 @@ $ ./mvn package
 For performance we're using (Gatling)[https://gatling.io/docs/current/quickstart/]:
 ```
 (cd spi/ && ../mvnw gatling:test)
+```
+
+### Debugging
+
+To debug the deployed module:
+```bash
+$ docker compose up
+$ .bin/update-spi.sh
+```
+then connect via Remote Debugging:
+```
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9097
 ```

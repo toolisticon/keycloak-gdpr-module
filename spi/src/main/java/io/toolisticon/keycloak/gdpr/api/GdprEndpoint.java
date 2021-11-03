@@ -1,5 +1,6 @@
 package io.toolisticon.keycloak.gdpr.api;
 
+import io.toolisticon.keycloak.gdpr.ContextPaths;
 import io.toolisticon.keycloak.gdpr.crypto.DecryptionFailedException;
 import io.toolisticon.keycloak.gdpr.crypto.EncryptionFailedException;
 import io.toolisticon.keycloak.gdpr.crypto.EncryptionService;
@@ -16,6 +17,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager.AuthResult;
 
+import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +43,7 @@ public class GdprEndpoint {
     /**
      * @return The admin API
      */
-    @Path("admin")
+    @Path(ContextPaths.ADMIN)
     public Object getAdminApiRoot() {
         return new AdminEndPoint(this.keycloakSession);
     }
@@ -60,6 +62,7 @@ public class GdprEndpoint {
             final String encodedCipherText = Base64.toBase64String(encryptedData);
             return new EncryptedData(data.getUserId(), encodedCipherText);
         } catch (EncoderException | EncryptionFailedException e) {
+            log.error("Got unknown encryption error {}", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -76,6 +79,7 @@ public class GdprEndpoint {
             final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
             return new DecryptedData(data.getUserId(), decryptedData);
         } catch (DecoderException | DecryptionFailedException | KeyNotFoundException e) {
+            log.error("Got unknown decrypting error {}", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -99,6 +103,7 @@ public class GdprEndpoint {
             log.debug("Encryption done {}", result);
             return result;
         } catch (EncryptionFailedException e) {
+            log.error("Got unknown encryption error {}", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -121,6 +126,7 @@ public class GdprEndpoint {
             log.debug("Decryption done {}", result);
             return result;
         } catch (DecryptionFailedException | KeyNotFoundException e) {
+            log.error("Got unknown decrypting error {}", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -141,6 +147,11 @@ public class GdprEndpoint {
     }
 
     private UserModel getUserModel(String userId) {
-        return this.keycloakSession.users().getUserById(getRealmModel(), userId);
+        UserModel user = this.keycloakSession.users().getUserById(getRealmModel(), userId);
+        if (user == null) {
+            log.error("User not found");
+            throw new EntityNotFoundException("User with id " + userId + " does not exist!");
+        }
+        return user;
     }
 }

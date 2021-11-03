@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.*;
 
+import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.HttpHeaders;
@@ -121,8 +122,8 @@ class GdprEndpointTest {
             EncryptedData result = endpoint.encrypt(data);
             EncryptedData result2 = endpoint.encrypt(data);
             assertNotNull(result);
-            assertEquals(result2, result);
-            assertEquals(result2.hashCode(), result.hashCode());
+            assertNotEquals(result2, result);
+            assertNotEquals(result2.hashCode(), result.hashCode());
             assertEquals(data.getUserId(), result.getUserId());
             assertNotEquals(data.getData(), result.toString());
             assertNotEquals(data.getData(), result.getCipherText());
@@ -138,8 +139,8 @@ class GdprEndpointTest {
             EncryptedBatchData result = endpoint.encrypt(data);
             EncryptedBatchData result2 = endpoint.encrypt(data);
             assertNotNull(result);
-            assertEquals(result2, result);
-            assertEquals(result2.hashCode(), result.hashCode());
+            assertNotEquals(result2, result);
+            assertNotEquals(result2.hashCode(), result.hashCode());
             assertEquals(data.getUserId(), result.getUserId());
             assertNotEquals(data.getData().toString(), result.toString());
             assertNotEquals(data.getData().get("text"), result.getCipherTextEntries().get("text"));
@@ -148,7 +149,7 @@ class GdprEndpointTest {
         @Test
         void shouldNotEncryptWithUnknownUser() {
             DecryptedData data =  new DecryptedData(buildUser().getId(),"lorem ipsum");
-            assertThrows(BadRequestException.class, () -> {
+            assertThrows(EntityNotFoundException.class, () -> {
                 endpoint.encrypt(data);
             });
         }
