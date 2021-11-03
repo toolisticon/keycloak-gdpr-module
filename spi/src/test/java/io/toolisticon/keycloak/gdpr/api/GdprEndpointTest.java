@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.*;
 
+import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.HttpHeaders;
@@ -148,7 +149,7 @@ class GdprEndpointTest {
         @Test
         void shouldNotEncryptWithUnknownUser() {
             DecryptedData data =  new DecryptedData(buildUser().getId(),"lorem ipsum");
-            assertThrows(BadRequestException.class, () -> {
+            assertThrows(EntityNotFoundException.class, () -> {
                 endpoint.encrypt(data);
             });
         }

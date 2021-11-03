@@ -19,10 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GdprEndpointProviderFactory  implements RealmResourceProviderFactory {
 
-    /**
-     * this ID identifies the rest provider and is used as base context path for this module
-     */
-    public static final String ID = ContextPaths.GDPR_ENDPOINT_PATH;
     private EncryptionService encryptionService = null;
 
     public static final String JCE_PROVIDER = "BC";
@@ -33,7 +29,10 @@ public class GdprEndpointProviderFactory  implements RealmResourceProviderFactor
     @Override
     public String getId()
     {
-        return ID;
+        /**
+         * this ID identifies the rest provider and is used as base context path for this module
+         */
+        return ContextPaths.GDPR_ENDPOINT_PATH;
     }
 
     @Override

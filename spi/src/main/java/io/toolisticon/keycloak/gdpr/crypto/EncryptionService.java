@@ -37,7 +37,7 @@ public class EncryptionService {
             byte[] cipherText = cipher.doFinal(data);
             return Arrays.concatenate(iv, cipherText);
         } catch (Exception e) {
-            throw new EncryptionFailedException();
+            throw new EncryptionFailedException(e);
         }
     }
 
