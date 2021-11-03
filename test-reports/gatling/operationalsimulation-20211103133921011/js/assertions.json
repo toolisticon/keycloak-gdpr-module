@@ -1,0 +1,10 @@
+{
+  "simulation": "crypt.OperationalSimulation",
+  "simulationId": "operationalsimulation",
+  "start": 1635946761011,
+  "description": "",
+  "scenarios": ["GDPR Encryption and Decryption", "OAuth Login"],
+  "assertions": [
+
+  ]
+}
