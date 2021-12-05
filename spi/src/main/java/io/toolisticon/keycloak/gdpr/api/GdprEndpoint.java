@@ -62,7 +62,7 @@ public class GdprEndpoint {
             final String encodedCipherText = Base64.toBase64String(encryptedData);
             return new EncryptedData(data.getUserId(), encodedCipherText);
         } catch (EncoderException | EncryptionFailedException e) {
-            log.error("Got unknown encryption error {}", e);
+            log.error("Got unknown encryption error", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -79,7 +79,7 @@ public class GdprEndpoint {
             final String decryptedData = new String(decryptedBytes, StandardCharsets.UTF_8);
             return new DecryptedData(data.getUserId(), decryptedData);
         } catch (DecoderException | DecryptionFailedException | KeyNotFoundException e) {
-            log.error("Got unknown decrypting error {}", e);
+            log.error("Got unknown decrypting error", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -103,7 +103,7 @@ public class GdprEndpoint {
             log.debug("Encryption done {}", result);
             return result;
         } catch (EncryptionFailedException e) {
-            log.error("Got unknown encryption error {}", e);
+            log.error("Got unknown encryption error", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
@@ -126,7 +126,7 @@ public class GdprEndpoint {
             log.debug("Decryption done {}", result);
             return result;
         } catch (DecryptionFailedException | KeyNotFoundException e) {
-            log.error("Got unknown decrypting error {}", e);
+            log.error("Got unknown decrypting error", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
