@@ -1,4 +1,14 @@
-# [](https://github.com/toolisticon/keycloak-gdpr-module/compare/v1.0.0-beta...v1.0.0) (2021-11-03)
+# [](https://github.com/toolisticon/keycloak-gdpr-module/compare/v1.0.0...v) (2021-12-20)
+
+
+### Bug Fixes
+
+* pom.xml to reduce vulnerabilities ([7e77414](https://github.com/toolisticon/keycloak-gdpr-module/commit/7e774142f40330591e65884e708acb9f68c8b48c))
+* pom.xml to reduce vulnerabilities ([dcbdfa6](https://github.com/toolisticon/keycloak-gdpr-module/commit/dcbdfa675402ac3530094abbd3d74d42285926fa))
+
+
+
+# [1.0.0](https://github.com/toolisticon/keycloak-gdpr-module/compare/v1.0.0-beta...v1.0.0) (2021-11-03)
 
 
 ### Bug Fixes
@@ -44,3 +54,6 @@
 * **Testing:** Adding basic Gatlin performance tests ([c94c34f](https://github.com/toolisticon/keycloak-gdpr-module/commit/c94c34f5d4f06b0cb1fa3b75c2a3b7ab836e665c)), closes [#4](https://github.com/toolisticon/keycloak-gdpr-module/issues/4)
 * **Tests:** Adding Keycloak performance tests ([9e87117](https://github.com/toolisticon/keycloak-gdpr-module/commit/9e8711766e574b760da2c3fbe7fb9e3f18c24eb4)), closes [#4](https://github.com/toolisticon/keycloak-gdpr-module/issues/4)
 * **Tests:** Adding regular keycloak auth scenario ([3b2efc2](https://github.com/toolisticon/keycloak-gdpr-module/commit/3b2efc226cb51eb29a1f1244e6278d66886adcab)), closes [#4](https://github.com/toolisticon/keycloak-gdpr-module/issues/4)
+
+
+
