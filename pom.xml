@@ -4,7 +4,7 @@
 
     <groupId>io.toolisticon.keycloak</groupId>
     <artifactId>gdpr-module</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>GDPR for Keycloak Server</name>
     <packaging>pom</packaging>
 
@@ -78,7 +78,7 @@
         </sonar.coverage.jacoco.xmlReportPaths>
 
         <!-- logging dependencies -->
-        <log4j2.version>2.14.1</log4j2.version>
+        <log4j2.version>2.17.0</log4j2.version>
         <slf4j.version>1.7.32</slf4j.version>
 
         <!-- dependencies: compile and runtime -->
@@ -110,6 +110,7 @@
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <maven-gatling-plugin.version>3.1.2</maven-gatling-plugin.version>
         <maven-scala-plugin.version>4.5.2</maven-scala-plugin.version>
+        <plugin.gitflow-maven.version>1.5.0</plugin.gitflow-maven.version>
 
     </properties>
 
@@ -448,6 +449,28 @@
             </executions>
           </plugin>
         </plugins>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>com.amashchenko.maven.plugin</groupId>
+              <artifactId>gitflow-maven-plugin</artifactId>
+              <version>${plugin.gitflow-maven.version}</version>
+              <configuration>
+                <gitFlowConfig>
+                  <productionBranch>master</productionBranch>
+                  <developmentBranch>develop</developmentBranch>
+                  <featureBranchPrefix>feature/</featureBranchPrefix>
+                  <releaseBranchPrefix>release/</releaseBranchPrefix>
+                  <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
+                  <supportBranchPrefix>support/</supportBranchPrefix>
+                  <versionTagPrefix>v</versionTagPrefix>
+                  <origin>origin</origin>
+                </gitFlowConfig>
+                <keepBranch>false</keepBranch>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
 
     </build>
 

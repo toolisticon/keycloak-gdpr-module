@@ -18,6 +18,8 @@ import static io.toolisticon.keycloak.gdpr.GdprEndpointProviderFactory.JCE_PROVI
 public class EncryptionService {
 
     public static final String CIPHER = "AES/GCM/NoPadding";
+    private static final int IV_LENGTH = 16;
+    private static final int AUTH_TAG_LENGTH = 128;
 
     private final KeyService keyService;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -52,8 +54,8 @@ public class EncryptionService {
         final SecretKey key = keyService.get(user)
                 .orElseThrow(() -> new KeyNotFoundException("No encryption key found"));
         try {
-            final byte[] iv = Arrays.copyOfRange(cipherText, 0, 16);
-            final byte[] data = Arrays.copyOfRange(cipherText, 16, cipherText.length);
+            final byte[] iv = Arrays.copyOfRange(cipherText, 0, IV_LENGTH);
+            final byte[] data = Arrays.copyOfRange(cipherText, IV_LENGTH, cipherText.length);
             final Cipher cipher = decryptCipher(key, iv);
             return cipher.doFinal(data);
         } catch (Exception e) {
@@ -64,19 +66,19 @@ public class EncryptionService {
     private Cipher encryptCipher(SecretKey key, byte[] iv)
             throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance(CIPHER, JCE_PROVIDER);
-        cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
+        cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(AUTH_TAG_LENGTH, iv));
         return cipher;
     }
 
     private Cipher decryptCipher(SecretKey key, byte[] iv)
             throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance(CIPHER, JCE_PROVIDER);
-        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
+        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(AUTH_TAG_LENGTH, iv));
         return cipher;
     }
 
     private byte[] generateIv() {
-        final byte[] iv = new byte[16];
+        final byte[] iv = new byte[IV_LENGTH];
         secureRandom.nextBytes(iv);
         return iv;
     }

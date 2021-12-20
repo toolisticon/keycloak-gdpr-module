@@ -10,17 +10,14 @@
     - [Local Keycloak server](#local-keycloak-server)
   - [Testing](#testing)
     - [Performance Tests](#performance-tests)
+
 # Keycloak GDPR Module
 
-> A module
+A Keycloak module to assist storing data in a GDPR compliant way, using Crypto Shredding.
+It stores the users keys and encrypt/decrypt the data, so that cryptographic keys will never
+leave the system.
 
-- [Keycloak GDPR Module](#keycloak-gdpr-module)
-  - [Setup](#setup)
-  - [Deploy into a standalone keycloak server](#deploy-into-a-standalone-keycloak-server)
-  - [Development](#development)
-    - [Local Keycloak server](#local-keycloak-server)
-  - [Testing](#testing)
-    - [Performance Tests](#performance-tests)
+The module is currently a Proof-of-Concept and has not yet been tested in production use cases.
 
 ## Setup
 
@@ -28,42 +25,25 @@ Prerequisites:
 * JDK 11+
 * Docker
 
-Build the EAR:
-
-1. build with maven
-   * `mvn clean package -DskipTests`
-2. find the gdpr-for-keycloak artifact in:
-   `deployment/target/gdpr-module-for-keycloak-${project.incremental.version}.ear`
-
-Start the docker stack:
-
-```
+Build and start:
+```bash
+# Start keycloak and MySQL database
 docker-compose up -d
+
+# Build the GDPR module
+mvn clean package -DskipTests
+
+# Copy the Build artifact into the Keycloak container
+.bin/update-spi.sh
 ```
 
-**Note:** If the keycloak container is started before the Maven project is built, instead of the ear-file there will be an empty
-directory created inside the container. The container then needs to be rebuilt in order to work properly.
+The Keycloak server will now be available on <http://localhost:8888>. You can log into the Administration Console using “**admin**” as both username and password.
+
 
 ## Deploy into a standalone keycloak server
 
-Copy the built artifact into the directory `${keycloak.home}/standalone/deployments` of a keycloak server.  
+Copy the built artifact from `./deployment/target/gdpr-module-for-keycloak-${project.incremental.version}.ear` into the directory `${keycloak.home}/standalone/deployments` of a keycloak server.  
 **NOTE:** *If the server is running during deployment you need to restart it!*
-
-
-## Development
-### Local Keycloak server
-A local Keycloak server for developing and testing the spi is available as a Docker container.
-
-To bring up the server, make sure you’ve installed and started [Docker Community Edition](https://docs.docker.com/engine/installation/), then use the following commands:
-```bash
-$ docker compose up
-```
-The Keycloak server will now be available on <http://localhost:8888>. You can log into the Administration Console using “**admin**” as both username and password.
-
-To test the module build it
-```
-$ ./mvn package
-```
 
 ## Testing
 

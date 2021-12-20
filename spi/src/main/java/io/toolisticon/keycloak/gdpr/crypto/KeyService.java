@@ -1,9 +1,7 @@
 package io.toolisticon.keycloak.gdpr.crypto;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.models.UserModel;
 
 import javax.crypto.KeyGenerator;
