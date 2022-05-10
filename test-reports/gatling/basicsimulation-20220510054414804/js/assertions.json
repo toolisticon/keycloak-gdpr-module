@@ -1,0 +1,10 @@
+{
+  "simulation": "crypt.BasicSimulation",
+  "simulationId": "basicsimulation",
+  "start": 1652161454804,
+  "description": "",
+  "scenarios": ["GDPR Encryption and Decryption"],
+  "assertions": [
+
+  ]
+}
